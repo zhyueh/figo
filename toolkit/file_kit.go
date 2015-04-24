@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"syscall"
 )
 
 func IsExists(path string) bool {
@@ -52,22 +51,6 @@ type DiskStatus struct {
 	All  uint64 `json:"all"`
 	Used uint64 `json:"used"`
 	Free uint64 `json:"free"`
-}
-
-func DiskUsage(path string) DiskStatus {
-	disk := DiskStatus{}
-	if IsWindows() {
-		return disk
-	}
-
-	fs := syscall.Statfs_t{}
-	err := syscall.Statfs(path, &fs)
-	if err == nil {
-		disk.All = fs.Blocks * uint64(fs.Bsize)
-		disk.Free = fs.Bfree * uint64(fs.Bsize)
-		disk.Used = disk.All - disk.Free
-	}
-	return disk
 }
 
 func IsWindows() bool {
