@@ -97,6 +97,13 @@ func (this *Orm) Save(o ModelInterface) error {
 		}
 		ModelUpdateId(o, id)
 	} else {
+		idName, idVal, idExists := GetIdFieldValue(o)
+		if !idExists {
+			return errors.New("no id define")
+		}
+		this.qb.Where(
+			fmt.Sprintf("`%s`=?", idName),
+			idVal)
 		sql, args := this.qb.Update()
 		fmt.Println(sql)
 		_, err := this.db.Update(sql, args...)

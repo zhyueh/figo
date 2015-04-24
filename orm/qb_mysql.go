@@ -43,9 +43,7 @@ func (this *MySQLQB) Table(table string) {
 
 func (this *MySQLQB) Where(cond string, i interface{}) {
 	this.conditions = cond
-	args := make([]interface{}, 1)
-	args[0] = i
-	this.values = args
+	this.values = append(this.values, i)
 }
 
 func (this *MySQLQB) And(cond string, i interface{}) {

@@ -67,6 +67,11 @@ func GetSaveModelFieldValues(model ModelInterface) ([]string, []interface{}) {
 		f := modelType.Field(i)
 		ormTag := f.Tag.Get("orm")
 		if ormTag != "" && ormTag != "auto" {
+
+			if ignoreField(f, val.Field(i)) {
+				continue
+			}
+
 			fields = append(fields, ModelFieldToSqlField(f))
 			values = append(values, val.Field(i).Interface())
 		}
@@ -74,6 +79,15 @@ func GetSaveModelFieldValues(model ModelInterface) ([]string, []interface{}) {
 
 	return fields, values
 
+}
+
+func ignoreField(field reflect.StructField, fieldVal reflect.Value) bool {
+	if fieldVal.Kind() == reflect.String {
+		if fieldVal.String() == "" && field.Tag.Get("empty") == "ignore" {
+			return true
+		}
+	}
+	return false
 }
 
 func ModelTableName(model ModelInterface) string {
