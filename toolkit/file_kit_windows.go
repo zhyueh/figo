@@ -1,9 +1,7 @@
 package toolkit
 
-import (
-	"syscall"
-)
+import ()
 
 func DiskUsage(path string) DiskStatus {
-	return &DiskStatus{}
+	return DiskStatus{}
 }
