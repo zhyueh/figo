@@ -1,7 +1,7 @@
 package orm
 
 import (
-	"fmt"
+	//"fmt"
 	"github.com/zhyueh/figo/toolkit"
 	"reflect"
 )
@@ -122,7 +122,7 @@ func ModelUpdateId(model interface{}, id int64) {
 }
 
 func DbRowToModel(row DbRow, model interface{}) {
-	fmt.Println(row)
+	//fmt.Println(row)
 	val := reflect.ValueOf(model).Elem()
 	modelType := val.Type()
 
@@ -133,10 +133,10 @@ func DbRowToModel(row DbRow, model interface{}) {
 			if exists {
 				val.Field(i).Set(convertSqlValueToFieldValue(o, f))
 			} else {
-				fmt.Println("do not exists ", name)
+				//fmt.Println("do not exists ", name)
 			}
 		} else {
-			fmt.Println("can not set")
+			//fmt.Println("can not set")
 		}
 	}
 }

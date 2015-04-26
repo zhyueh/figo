@@ -7,7 +7,35 @@ import (
 	"hash/adler32"
 	"hash/crc32"
 	"os"
+
+	"bytes"
+	"math/rand"
+	"time"
 )
+
+func RandomString(l int) string {
+	var result bytes.Buffer
+	var temp string
+	for i := 0; i < l; {
+		seed := RandInt(0, 10)
+		mod := seed % 3
+		if mod == 0 {
+			temp = string(RandInt(65, 90))
+		} else if mod == 1 {
+			temp = string(RandInt(48, 57))
+		} else {
+			temp = string(RandInt(97, 122))
+		}
+		result.WriteString(temp)
+		i++
+	}
+	return result.String()
+}
+
+func RandInt(min int, max int) int {
+	rand.Seed(time.Now().UTC().UnixNano())
+	return min + rand.Intn(max-min)
+}
 
 func HashCrc32(data []byte) uint32 {
 	return uint32(crc32.ChecksumIEEE(data))

@@ -59,21 +59,21 @@ func (this *Orm) Order(order string) *Orm {
 	return this
 }
 
-func (this *Orm) Find(o ModelInterface) error {
+func (this *Orm) Find(o ModelInterface) (error, bool) {
 	field, val, exists := GetIdFieldValue(o)
 	if exists {
 		this.qb.Where(fmt.Sprintf("`%s`=?", field), val)
 		this.qb.Table(ModelTableName(o))
 		sql, args := this.qb.Select()
-		fmt.Println(sql)
+		//fmt.Println(sql)
 		dbrow, err := this.db.One(sql, args...)
 		if err != nil {
-			return err
+			return err, false
 		}
 		DbRowToModel(dbrow, o)
-		return nil
+		return nil, len(dbrow) != 0
 	} else {
-		return errors.New("no auto fields")
+		return errors.New("no auto fields"), false
 	}
 }
 
@@ -85,12 +85,12 @@ func (this *Orm) Save(o ModelInterface) error {
 	fields, values := GetSaveModelFieldValues(o)
 	this.qb.Fields(fields)
 	this.qb.Values(values)
-	fmt.Println("model table name", ModelTableName(o))
+	//fmt.Println("model table name", ModelTableName(o))
 	this.qb.Table(ModelTableName(o))
 
 	if NeedInsertModel(o) {
 		sql, args := this.qb.Insert()
-		fmt.Println(sql)
+		//fmt.Println(sql)
 		id, err := this.db.Insert(sql, args...)
 		if err != nil {
 			return err
