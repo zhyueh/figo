@@ -105,7 +105,7 @@ func ModelFieldToSqlField(field reflect.StructField) string {
 		return name
 	}
 
-	return ""
+	return toolkit.CamelCaseToUnderScore(field.Name)
 }
 
 func ModelUpdateId(model interface{}, id int64) {
