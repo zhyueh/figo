@@ -23,7 +23,6 @@ func CamelCaseToUnderScore(code string) string {
 		} else {
 			buf.WriteRune(r)
 		}
-		fmt.Println(buf.String())
 	}
 
 	return buf.String()
@@ -69,7 +68,7 @@ MSI for map[string]interface{}
 
 */
 
-func ZipObj(o interface{}, re map[string]interface{}) (err error) {
+func ZipObjString(o interface{}, re map[string]string) (err error) {
 	defer func() {
 		if zipErr := recover(); zipErr != nil {
 			err = errors.New("zip error")
@@ -81,7 +80,7 @@ func ZipObj(o interface{}, re map[string]interface{}) (err error) {
 
 	for i := 0; i < val.NumField(); i++ {
 		f := modelType.Field(i)
-		re[f.Name] = val.Field(i).Interface()
+		re[f.Name] = ConvertToString(val.Field(i).Interface())
 	}
 
 	err = nil

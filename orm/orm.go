@@ -39,8 +39,8 @@ func (this *Orm) Close() {
 	this.db.Close()
 }
 
-func (this *Orm) Where(cond string, i interface{}) *Orm {
-	this.qb.Where(cond, i)
+func (this *Orm) Where(cond string, i ...interface{}) *Orm {
+	this.qb.Where(cond, i...)
 	return this
 }
 
@@ -77,7 +77,20 @@ func (this *Orm) Find(o ModelInterface) (error, bool) {
 	}
 }
 
-func (this *Orm) One(o ModelInterface) error {
+func (this *Orm) One(o ModelInterface) (error, bool) {
+	this.qb.Table(ModelTableName(o))
+	sql, args := this.qb.Select()
+	//fmt.Println(sql)
+	dbrow, err := this.db.One(sql, args...)
+	if err != nil {
+		return err, false
+	}
+	DbRowToModel(dbrow, o)
+	return nil, len(dbrow) != 0
+}
+
+func (this *Orm) All(os []ModelInterface) error {
+	//unspported
 	return nil
 }
 

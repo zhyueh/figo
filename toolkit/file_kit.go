@@ -1,10 +1,25 @@
 package toolkit
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
+
+func PathJoin(args ...string) string {
+	buf := bytes.NewBuffer([]byte{})
+	for i, p := range args {
+		tmp := strings.TrimRight(p, "/")
+		if i != 0 && tmp[0] != '/' {
+			buf.WriteString("/")
+		}
+		buf.WriteString(tmp)
+	}
+
+	return buf.String()
+}
 
 func IsExists(path string) bool {
 	_, err := os.Stat(path)

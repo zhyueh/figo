@@ -41,9 +41,9 @@ func (this *MySQLQB) Table(table string) {
 	this.tables = append(this.tables, table)
 }
 
-func (this *MySQLQB) Where(cond string, i interface{}) {
+func (this *MySQLQB) Where(cond string, i ...interface{}) {
 	this.conditions = cond
-	this.values = append(this.values, i)
+	this.values = append(this.values, i...)
 }
 
 func (this *MySQLQB) And(cond string, i interface{}) {
@@ -141,7 +141,11 @@ func (this *MySQLQB) getWhereString() string {
 }
 
 func (this *MySQLQB) getOrderString() string {
-	return strings.Join(this.orders, MYSQL_COMMA_SPACE)
+	order := strings.Join(this.orders, MYSQL_COMMA_SPACE)
+	if len(order) > 0 {
+		return fmt.Sprintf("order by %s", order)
+	}
+	return ""
 }
 
 func (this *MySQLQB) getLimitString() string {

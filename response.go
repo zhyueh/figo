@@ -7,7 +7,7 @@ import (
 )
 
 type Response struct {
-	baseHttpResponse http.ResponseWriter
+	BaseHttpResponse http.ResponseWriter
 	extraHeader      map[string]string
 	responseBody     []byte
 	flushed          bool
@@ -15,7 +15,7 @@ type Response struct {
 
 func NewResponse(w http.ResponseWriter) *Response {
 	this := &Response{}
-	this.baseHttpResponse = w
+	this.BaseHttpResponse = w
 	this.extraHeader = make(map[string]string, 2)
 	this.responseBody = make([]byte, 1024)
 	this.flushed = false
@@ -48,9 +48,9 @@ func (this *Response) Flush() error {
 	if !this.flushed {
 		//flush to base http response writer
 
-		this.baseHttpResponse.Write(this.responseBody)
+		this.BaseHttpResponse.Write(this.responseBody)
 		for k, v := range this.extraHeader {
-			this.baseHttpResponse.Header().Add(k, v)
+			this.BaseHttpResponse.Header().Add(k, v)
 		}
 
 		this.flushed = true
