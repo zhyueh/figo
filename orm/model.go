@@ -48,7 +48,7 @@ func GetIdFieldValue(o interface{}) (string, interface{}, bool) {
 	for i := 0; i < val.NumField(); i++ {
 		f := modelType.Field(i)
 		if f.Tag.Get("orm") == "auto" {
-			return f.Tag.Get("name"), val.Field(i).Interface(), true
+			return ModelFieldToSqlField(f), val.Field(i).Interface(), true
 		}
 	}
 
@@ -153,7 +153,7 @@ func convertSqlValueToFieldValue(o interface{}, f reflect.StructField) reflect.V
 func getCanSetFieldName(f reflect.StructField) (string, bool) {
 	ormTag := f.Tag.Get("orm")
 	if ormTag != "" {
-		return f.Tag.Get("name"), true
+		return ModelFieldToSqlField(f), true
 	}
 	return "", false
 }
