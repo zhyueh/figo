@@ -3,6 +3,7 @@ package orm
 import (
 	"errors"
 	"fmt"
+	"reflect"
 )
 
 type Orm struct {
@@ -89,9 +90,33 @@ func (this *Orm) One(o ModelInterface) (error, bool) {
 	return nil, len(dbrow) != 0
 }
 
-func (this *Orm) All(os []ModelInterface) error {
-	//unspported
-	return nil
+func (this *Orm) All(o ModelInterface) (error, []interface{}) {
+	//if len(os) == 0 {
+	//	return errors.New("no data list when calling All"), 0
+	//}
+	//o := os[0]
+	re := make([]interface{}, 0)
+	val := reflect.ValueOf(o).Elem()
+	modelType := val.Type()
+
+	this.qb.Table(ModelTableName(o))
+	sql, args := this.qb.Select()
+	//fmt.Println(sql)
+	dbrows, err := this.db.All(sql, args...)
+	if err != nil {
+		return err, re
+	}
+	if len(dbrows) == 0 {
+		return nil, re
+	}
+	for _, dbrow := range dbrows {
+		newo := reflect.New(modelType).Interface()
+		DbRowToModel(dbrow, newo)
+		re = append(re, newo)
+	}
+
+	return nil, re
+
 }
 
 func (this *Orm) Save(o ModelInterface) error {
