@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"time"
 )
 
 func CamelCaseToUnderScore(code string) string {
@@ -97,6 +98,35 @@ func MergeMSS(target, source map[string]string) {
 	for k, v := range source {
 		target[k] = v
 	}
+}
+
+func ConvertToTime(o interface{}) time.Time {
+	switch o.(type) {
+	case string:
+		val := o.(string)
+		if t, err := time.Parse("2006-01-02", val); err == nil {
+			return t
+		} else if t, err := time.Parse("2006-01-02 15:03:04", val); err == nil {
+			return t
+		}
+
+	}
+	return time.Now()
+
+}
+
+func ConvertToFloat64(o interface{}) float64 {
+	switch o.(type) {
+	case float64:
+		return o.(float64)
+	case string:
+		if f, err := strconv.ParseFloat(o.(string), 64); err == nil {
+			return f
+		}
+	case int:
+		return float64(o.(int))
+	}
+	return 0.0
 }
 
 func ConvertToString(o interface{}) string {

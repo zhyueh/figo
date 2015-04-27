@@ -1,7 +1,6 @@
 package orm
 
 import (
-	//"fmt"
 	"github.com/zhyueh/figo/toolkit"
 	"reflect"
 )
@@ -146,8 +145,16 @@ func convertSqlValueToFieldValue(o interface{}, f reflect.StructField) reflect.V
 		return reflect.ValueOf(toolkit.ConvertToString(o))
 	} else if f.Type.Kind() == reflect.Int {
 		return reflect.ValueOf(toolkit.ConvertToInt(o))
+	} else if f.Type.Kind() == reflect.Float64 {
+		return reflect.ValueOf(toolkit.ConvertToFloat64(o))
+	} else if f.Type.Kind() == reflect.Struct {
+		//convert time
+		if f.Type.PkgPath() == "time" && f.Type.Name() == "Time" {
+			return reflect.ValueOf(toolkit.ConvertToTime(o))
+
+		}
 	}
-	return reflect.ValueOf("")
+	return reflect.Zero(f.Type)
 }
 
 func getCanSetFieldName(f reflect.StructField) (string, bool) {
