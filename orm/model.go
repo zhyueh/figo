@@ -96,7 +96,7 @@ func ModelTableName(model ModelInterface) string {
 	} else {
 		modelType := reflect.ValueOf(model).Elem().Type()
 		modelName := modelType.Name()
-		return modelName
+		return toolkit.CamelCaseToUnderScore(modelName)
 	}
 }
 
