@@ -1,7 +1,7 @@
 package orm
 
 import (
-	"fmt"
+	//"fmt"
 	"github.com/zhyueh/figo/toolkit"
 	"reflect"
 	"time"

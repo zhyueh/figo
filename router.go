@@ -1,27 +1,33 @@
+// router base on reflect
+// we would create a new controller for
+// every http request
 package figo
 
+import (
+	"reflect"
+)
+
 type Router struct {
-	routerMapFunc map[string]func() *Controller
+	routerMap map[string]reflect.Type
 }
 
 func NewRouter() *Router {
 	re := &Router{}
 
-	re.routerMapFunc = make(map[string]func() *Controller, 10)
+	re.routerMap = make(map[string]reflect.Type, 10)
 
 	return re
 }
 
-func (this *Router) AddController(path string, createFunc func() *Controller) {
-
-	this.routerMapFunc[path] = createFunc
-
+func (this *Router) AddController(path string, c ControllerInterface) {
+	this.routerMap[path] = reflect.TypeOf(c)
 }
 
-func (this *Router) GetController(path string) *Controller {
+func (this *Router) GetController(path string) ControllerInterface {
 
-	if createFunc, exists := this.routerMapFunc[path]; exists {
-		return createFunc()
+	if ct, exists := this.routerMap[path]; exists {
+		c := reflect.New(ct)
+		return c.Interface().(ControllerInterface)
 	}
 
 	return nil
