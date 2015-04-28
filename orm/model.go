@@ -1,8 +1,10 @@
 package orm
 
 import (
+	"fmt"
 	"github.com/zhyueh/figo/toolkit"
 	"reflect"
+	"time"
 )
 
 type ModelInterface interface {
@@ -72,11 +74,30 @@ func GetSaveModelFieldValues(model ModelInterface) ([]string, []interface{}) {
 			}
 
 			fields = append(fields, ModelFieldToSqlField(f))
-			values = append(values, val.Field(i).Interface())
+			values = append(values, updateFieldValue(
+				f,
+				val.Field(i),
+			))
 		}
 	}
 
 	return fields, values
+
+}
+
+func updateFieldValue(f reflect.StructField, v reflect.Value) interface{} {
+	if f.Type.PkgPath() == "time" && f.Type.Name() == "Time" {
+		//return different  value when orm is in ("int", "date")
+		//TODO is a pointer?
+		t := v.Interface().(time.Time)
+		if f.Tag.Get("orm") == "int" {
+			return t.Unix()
+		} else if f.Tag.Get("orm") == "date" {
+			return t.Format("2006-01-02")
+		}
+	}
+
+	return v.Interface()
 
 }
 
