@@ -103,7 +103,7 @@ func (this *App) getControllerLogger(name string) *log.DataLogger {
 }
 
 func (this *App) createControllerLogger(name string) *log.DataLogger {
-	logger, err := log.NewDataLogger(this.config.LogPath, name, log.TruncateHour, log.LevelWarn, 1000)
+	logger, err := log.NewDataLogger(this.config.LogPath, name, log.TruncateHour, log.LevelInfo, 1000)
 	if err != nil {
 		this.appLogger.Fatal("%v", err)
 	}

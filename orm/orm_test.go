@@ -1,26 +1,30 @@
 package orm
 
 import (
-	"model"
 	"testing"
 )
 
 type user struct {
-	orm.Model
+	Model
 	Id       int    `orm:"auto"`
 	Name     string `orm:"varchar(16)" name:"name"`
-	Age      int    `orm:"int" name:"age"`
+	Age      int    `orm:"int" name:"age" readonly:"1"`
 	Datetime string `orm:"datetime" name:"datetime" empty:"ignore"`
 }
 
-func TestAll() {
+func TestAll(t *testing.T) {
 	orm := getOrm()
+	//u := new(user)
+	//t.Log(orm.Fork().All(u))
 	u := new(user)
-
-	fmt.Println(orm.Fork().All(u))
+	u.Id = 4
+	orm.Fork().Find(u)
+	t.Log(u)
+	u.Age = 14
+	orm.Fork().Save(u)
 }
 
-func getOrm() *orm {
-	orm, _ := NewOrm("mysql", "127.0.0.1", "root", "root", 3306)
+func getOrm() *Orm {
+	orm, _ := NewOrm("mysql", "127.0.0.1", "root", "root", "test", 3306)
 	return orm
 }

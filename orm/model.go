@@ -105,6 +105,8 @@ func ignoreField(field reflect.StructField, fieldVal reflect.Value) bool {
 	if fieldVal.Kind() == reflect.String {
 		if fieldVal.String() == "" && field.Tag.Get("empty") == "ignore" {
 			return true
+		} else if field.Tag.Get("readonly") != "" {
+			return true
 		}
 	}
 	return false

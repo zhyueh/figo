@@ -106,7 +106,7 @@ func ConvertToTime(o interface{}) time.Time {
 		val := o.(string)
 		if t, err := time.Parse("2006-01-02", val); err == nil {
 			return t
-		} else if t, err := time.Parse("2006-01-02 15:03:04", val); err == nil {
+		} else if t, err := time.Parse("2006-01-02 15:04:05", val); err == nil {
 			return t
 		}
 	case int:
