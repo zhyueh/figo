@@ -109,6 +109,9 @@ func ConvertToTime(o interface{}) time.Time {
 		} else if t, err := time.Parse("2006-01-02 15:04:05", val); err == nil {
 			return t
 		}
+	case int64:
+		t := time.Unix(o.(int64), 0)
+		return t
 	case int:
 		t := time.Unix(int64(o.(int)), 0)
 		return t

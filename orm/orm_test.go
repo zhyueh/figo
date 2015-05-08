@@ -2,14 +2,17 @@ package orm
 
 import (
 	"testing"
+	"time"
 )
 
 type user struct {
 	Model
-	Id       int    `orm:"auto"`
-	Name     string `orm:"varchar(16)" name:"name"`
-	Age      int    `orm:"int" name:"age" readonly:"1"`
-	Datetime string `orm:"datetime" name:"datetime" empty:"ignore"`
+	Id   int    `orm:"auto"`
+	Name string `orm:"varchar(16)" name:"name"`
+	Age  int    `orm:"int" name:"age" readonly:"1"`
+	//Datetime  time.Time `orm:"datetime" name:"datetime" empty:"ignore"`
+	//Date      time.Time `orm:"datetime" name:"date" empty:"ignore"`
+	Timestamp time.Time `orm:"datetime" name:"timestamp" empty:"ignore"`
 }
 
 func TestAll(t *testing.T) {
@@ -19,9 +22,7 @@ func TestAll(t *testing.T) {
 	u := new(user)
 	u.Id = 4
 	orm.Fork().Find(u)
-	t.Log(u)
-	u.Age = 14
-	orm.Fork().Save(u)
+	t.Fatal(u)
 }
 
 func getOrm() *Orm {
