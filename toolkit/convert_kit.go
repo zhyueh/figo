@@ -117,7 +117,7 @@ func ConvertToTime(o interface{}) time.Time {
 		return t
 
 	}
-	return time.Now()
+	return time.Time{}
 
 }
 
