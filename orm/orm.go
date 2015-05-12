@@ -156,3 +156,7 @@ func (this *Orm) Save(o ModelInterface) error {
 func (this *Orm) Query(sql string, args ...interface{}) ([]DbRow, error) {
 	return this.db.All(sql, args...)
 }
+
+func (this *Orm) Execute(sql string, args ...interface{}) error {
+	return this.db.Exec(sql, args...)
+}
