@@ -143,7 +143,7 @@ func (this *Orm) Save(o ModelInterface) error {
 			fmt.Sprintf("`%s`=?", idName),
 			idVal)
 		sql, args := this.qb.Update()
-		fmt.Println(sql)
+		//fmt.Println(sql)
 		_, err := this.db.Update(sql, args...)
 		if err != nil {
 			return err
