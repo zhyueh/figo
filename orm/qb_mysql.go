@@ -2,6 +2,7 @@ package orm
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -14,7 +15,7 @@ type MySQLQB struct {
 	tables     []string
 	conditions string
 	orders     []string
-	limit      int
+	limit      string
 }
 
 func NewMySQLQB() *MySQLQB {
@@ -24,7 +25,7 @@ func NewMySQLQB() *MySQLQB {
 	re.tables = make([]string, 0)
 	re.conditions = ""
 	re.orders = make([]string, 0)
-	re.limit = 0
+	re.limit = ""
 
 	return re
 }
@@ -61,7 +62,22 @@ func (this *MySQLQB) Order(order string) {
 }
 
 func (this *MySQLQB) Limit(limit int) {
-	this.limit = limit
+	this.limit = strconv.Itoa(limit)
+}
+
+func (this *MySQLQB) Page(index, num int) {
+	this.limit = fmt.Sprintf("%d, %d", index*num, num)
+}
+
+func (this *MySQLQB) Count() (string, []interface{}) {
+	sql := fmt.Sprintf(
+		"SELECT count(1) as num FROM %s %s",
+		this.getTablesString(),
+		this.getWhereString(),
+	)
+
+	return sql, this.values
+
 }
 
 func (this *MySQLQB) Select() (string, []interface{}) {
@@ -149,8 +165,8 @@ func (this *MySQLQB) getOrderString() string {
 }
 
 func (this *MySQLQB) getLimitString() string {
-	if this.limit > 0 {
-		return fmt.Sprintf("LIMIT %d", this.limit)
+	if len(this.limit) > 0 {
+		return fmt.Sprintf("LIMIT %s", this.limit)
 	}
 	return ""
 }

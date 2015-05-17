@@ -138,7 +138,10 @@ func ModelUpdateId(model interface{}, id int64) {
 
 	for i := 0; i < val.NumField(); i++ {
 		f := modelType.Field(i)
-		if f.Tag.Get("orm") == "auto" {
+		if f.Tag.Get("orm") == "auto" &&
+			(f.Type.Kind() == reflect.Int ||
+				f.Type.Kind() == reflect.Int64) {
+			val.FieldByName(f.Name).SetInt(id)
 			return
 		}
 	}

@@ -3,6 +3,7 @@ package orm
 import (
 	"errors"
 	"fmt"
+	"github.com/zhyueh/figo/toolkit"
 	"reflect"
 )
 
@@ -60,6 +61,11 @@ func (this *Orm) Order(order string) *Orm {
 	return this
 }
 
+func (this *Orm) Page(index, num int) *Orm {
+	this.qb.Page(index, num)
+	return this
+}
+
 func (this *Orm) Find(o ModelInterface) (error, bool) {
 	field, val, exists := GetIdFieldValue(o)
 	if exists {
@@ -101,7 +107,7 @@ func (this *Orm) All(o ModelInterface) (error, []interface{}) {
 
 	this.qb.Table(ModelTableName(o))
 	sql, args := this.qb.Select()
-	//fmt.Println(sql)
+	fmt.Println(sql)
 	dbrows, err := this.db.All(sql, args...)
 	if err != nil {
 		return err, re
@@ -116,7 +122,22 @@ func (this *Orm) All(o ModelInterface) (error, []interface{}) {
 	}
 
 	return nil, re
+}
 
+func (this *Orm) Count(o ModelInterface) (int, error) {
+	this.qb.Table(ModelTableName(o))
+	sql, args := this.qb.Count()
+	dbrows, err := this.db.All(sql, args...)
+	//fmt.Println(sql)
+	//fmt.Println(dbrows)
+	if err != nil || len(dbrows) != 1 {
+		return 0, err
+	} else {
+		if val, exists := dbrows[0]["num"]; exists {
+			return toolkit.ConvertToInt(val), nil
+		}
+		return 0, nil
+	}
 }
 
 func (this *Orm) Save(o ModelInterface) error {
