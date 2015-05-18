@@ -156,8 +156,15 @@ func ConvertToInt(o interface{}) int {
 	case float64:
 		return int(o.(float64))
 	case string:
-		i, _ := strconv.Atoi(o.(string))
-		return i
+		i, err := strconv.Atoi(o.(string))
+		if err == nil {
+			return i
+		}
+
+		f, ferr := strconv.ParseFloat(o.(string), 64)
+		if ferr == nil {
+			return int(f)
+		}
 	}
 	return 0
 }

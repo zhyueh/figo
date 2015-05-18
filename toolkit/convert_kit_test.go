@@ -26,7 +26,7 @@ func TestNamingConvension(t *testing.T) {
 
 func TestToInt(t *testing.T) {
 	var i = 1
-	in := []interface{}{1.2, 1, "1"}
+	in := []interface{}{1.2, 1, "1", "1.000"}
 	for _, v := range in {
 		if ConvertToInt(v) != i {
 			t.Fatal("failed to int", v)
