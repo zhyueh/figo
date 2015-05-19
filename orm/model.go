@@ -33,13 +33,32 @@ func NeedInsertModel(model interface{}) bool {
 		f := modelType.Field(i)
 		if f.Tag.Get("orm") == "auto" {
 			auto := val.Field(i).Int()
-			if auto > 0 {
-				return false
+			if auto == 0 {
+				return true
 			}
 		}
 	}
 
-	return true
+	return false
+}
+
+func GetKeyFieldValues(o interface{}) ([]string, []interface{}, bool) {
+	val := reflect.ValueOf(o).Elem()
+	modelType := val.Type()
+
+	fields := make([]string, 0)
+	vals := make([]interface{}, 0)
+
+	for i := 0; i < val.NumField(); i++ {
+		f := modelType.Field(i)
+		if f.Tag.Get("orm") == "auto" || f.Tag.Get("orm") == "primary" {
+			//return ModelFieldToSqlField(f), val.Field(i).Interface(), true
+			fields = append(fields, ModelFieldToSqlField(f))
+			vals = append(vals, val.Field(i).Interface())
+		}
+	}
+	return fields, vals, true
+	//return "", nil, false
 }
 
 func GetIdFieldValue(o interface{}) (string, interface{}, bool) {
@@ -48,7 +67,7 @@ func GetIdFieldValue(o interface{}) (string, interface{}, bool) {
 
 	for i := 0; i < val.NumField(); i++ {
 		f := modelType.Field(i)
-		if f.Tag.Get("orm") == "auto" {
+		if f.Tag.Get("orm") == "auto" || f.Tag.Get("orm") == "primary" {
 			return ModelFieldToSqlField(f), val.Field(i).Interface(), true
 		}
 	}
@@ -67,7 +86,7 @@ func GetSaveModelFieldValues(model ModelInterface) ([]string, []interface{}) {
 	for i := 0; i < val.NumField(); i++ {
 		f := modelType.Field(i)
 		ormTag := f.Tag.Get("orm")
-		if ormTag != "" && ormTag != "auto" {
+		if ormTag != "" && ormTag != "auto" && ormTag != "primary" {
 
 			if ignoreField(f, val.Field(i)) {
 				continue

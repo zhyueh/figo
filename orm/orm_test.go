@@ -16,6 +16,23 @@ type user struct {
 	Timestamp time.Time `orm:"datetime" readonly:"true" name:"timestamp" empty:"ignore"`
 }
 
+type UserDetail struct {
+	Model
+	UserId  int    `orm:"primary"`
+	Address string `orm:"varchar(25)"`
+}
+
+func TestInsertIgnore(t *testing.T) {
+	orm := getOrm()
+	ud := new(UserDetail)
+	ud.UserId = 1
+	ud.Address = toolkit.RandomString(5)
+	err := orm.Fork().Save(ud)
+	if err != nil {
+		t.Fatal("insert ignore error", err)
+	}
+}
+
 func TestSaveAndFind(t *testing.T) {
 	orm := getOrm()
 	randomString := toolkit.RandomString(5)

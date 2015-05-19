@@ -10,8 +10,12 @@ const MYSQL_COMMA_SPACE = ", "
 
 //mysql qb for mysql quuery builder
 type MySQLQB struct {
-	fields     []string
-	values     []interface{}
+	fields []string
+	values []interface{}
+
+	keyFields []string
+	keyValues []interface{}
+
 	tables     []string
 	conditions string
 	orders     []string
@@ -28,6 +32,14 @@ func NewMySQLQB() *MySQLQB {
 	re.limit = ""
 
 	return re
+}
+
+func (this *MySQLQB) KeyFields(fields []string) {
+	this.keyFields = fields
+}
+
+func (this *MySQLQB) KeyValues(values []interface{}) {
+	this.keyValues = values
 }
 
 func (this *MySQLQB) Fields(fields []string) {
@@ -113,6 +125,31 @@ func (this *MySQLQB) Insert() (string, []interface{}) {
 	return sql, this.values
 }
 
+func (this *MySQLQB) InsertIgnore() (string, []interface{}) {
+	if len(this.keyValues) == 0 {
+		return this.Insert()
+	}
+
+	vals := make([]interface{}, len(this.keyFields))
+	for i, v := range this.keyValues {
+		vals[i] = v
+	}
+	vals = append(vals, this.values...)
+	vals = append(vals, this.values...)
+
+	sql := fmt.Sprintf(
+		"insert into %s (%s, %s) value(%s, %s) on duplicate key update %s",
+		this.getTablesString(),
+		this.getKeyFieldsString(),
+		this.getFieldsString(),
+		this.getKeyValuesSpace(),
+		this.getValuesSpace(),
+		this.getFieldValuePair())
+
+	return sql, vals
+
+}
+
 func (this *MySQLQB) getFieldValuePair() string {
 	fv := make([]string, len(this.fields))
 
@@ -129,6 +166,28 @@ func (this *MySQLQB) getValuesSpace() string {
 	}
 
 	return strings.Join(s, MYSQL_COMMA_SPACE)
+}
+
+func (this *MySQLQB) getKeyValuesSpace() string {
+	s := make([]string, len(this.keyValues))
+	for i, _ := range this.keyValues {
+		s[i] = "?"
+	}
+
+	return strings.Join(s, MYSQL_COMMA_SPACE)
+}
+
+func (this *MySQLQB) getKeyFieldsString() string {
+	if len(this.keyFields) == 0 {
+		return "*"
+	} else {
+		fields := make([]string, len(this.keyFields))
+		for i, v := range this.keyFields {
+			fields[i] = fmt.Sprintf("`%s`", v)
+		}
+
+		return strings.Join(fields, MYSQL_COMMA_SPACE)
+	}
 }
 
 func (this *MySQLQB) getFieldsString() string {

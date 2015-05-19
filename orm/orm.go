@@ -156,15 +156,15 @@ func (this *Orm) Save(o ModelInterface) error {
 		}
 		ModelUpdateId(o, id)
 	} else {
-		idName, idVal, idExists := GetIdFieldValue(o)
-		if !idExists {
+		kFields, kValues, _ := GetKeyFieldValues(o)
+		//fmt.Println(kFields, kValues)
+		if len(kFields) == 0 {
 			return errors.New("no id define")
 		}
-		this.qb.Where(
-			fmt.Sprintf("`%s`=?", idName),
-			idVal)
-		sql, args := this.qb.Update()
-		//fmt.Println(sql)
+		this.qb.KeyFields(kFields)
+		this.qb.KeyValues(kValues)
+		sql, args := this.qb.InsertIgnore()
+		//fmt.Println(sql, args)
 		_, err := this.db.Update(sql, args...)
 		if err != nil {
 			return err
