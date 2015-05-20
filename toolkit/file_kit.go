@@ -2,6 +2,7 @@ package toolkit
 
 import (
 	"bytes"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -35,6 +36,31 @@ func EnsureDirExists(dirPaths ...string) {
 			os.MkdirAll(dirPath, 0755)
 		}
 	}
+}
+
+func ReadAll(path string) ([]byte, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	return ioutil.ReadAll(f)
+}
+
+func WriteAll(body []byte, path string) error {
+	f, err := os.OpenFile(path, os.O_CREATE, 0666)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	_, err = f.Write(body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }
 
 func RemoveFileIfExists(path string) bool {
