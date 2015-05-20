@@ -107,7 +107,7 @@ func (this *Orm) All(o ModelInterface) (error, []interface{}) {
 
 	this.qb.Table(ModelTableName(o))
 	sql, args := this.qb.Select()
-	fmt.Println(sql)
+	//fmt.Println(sql)
 	dbrows, err := this.db.All(sql, args...)
 	if err != nil {
 		return err, re
