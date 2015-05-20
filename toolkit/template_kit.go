@@ -51,9 +51,8 @@ func (this *Template) Do() string {
 			if status == 0 {
 				inRender = false
 				tmp := temp.String()
-				fmt.Println(tmp)
+				//remove the last brackets
 				tmp = tmp[0 : len(tmp)-2]
-				fmt.Println(this.doRender(tmp))
 				result = strings.Replace(
 					result,
 					"{{"+tmp+"}}",
