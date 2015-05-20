@@ -17,26 +17,55 @@ func NewTemplate(template string, comps map[string]string) *Template {
 }
 
 func (this *Template) Do() string {
-	result := bytes.NewBuffer([]byte{})
+	result := this.Template
 
 	temp := bytes.NewBuffer([]byte{})
+	status := 0
 	inRender := false
 
 	for _, s := range this.Template {
-		if s == '{' {
-			inRender = true
-			temp.Reset()
-		} else if s == '}' {
-			inRender = false
-			result.WriteString(this.doRender(temp.String()))
-		} else if inRender {
-			temp.WriteRune(s)
-		} else {
-			result.WriteRune(s)
+
+		if !inRender {
+			if s == '{' {
+				status += 1
+			} else {
+				status = 0
+			}
+
+			if status == 2 {
+				inRender = true
+				temp.Reset()
+				continue
+			}
 		}
+
+		if inRender {
+			temp.WriteRune(s)
+
+			if s == '}' {
+				status -= 1
+			} else {
+				status = 2
+			}
+
+			if status == 0 {
+				inRender = false
+				tmp := temp.String()
+				fmt.Println(tmp)
+				tmp = tmp[0 : len(tmp)-2]
+				fmt.Println(this.doRender(tmp))
+				result = strings.Replace(
+					result,
+					"{{"+tmp+"}}",
+					this.doRender(tmp),
+					-1,
+				)
+			}
+		}
+
 	}
 
-	return result.String()
+	return result
 }
 
 func (this *Template) doRender(code string) string {

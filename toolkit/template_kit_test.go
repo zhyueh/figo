@@ -8,11 +8,12 @@ func TestH(t *testing.T) {
 
 	paras := make(map[string]string, 0)
 	paras["bbb"] = "BBB"
-	template := "aaa{bbb|Lower|Timestamp}"
+	template := "aaa{{bbb|Lower}}"
 	tmp := NewTemplate(template, paras)
 
-	if tmp.Do() != "aaa123" {
-		t.Fatal("template not work")
+	result := tmp.Do()
+	if result != "aaabbb" {
+		t.Fatal("template not work", result)
 	}
 
 }
