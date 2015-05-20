@@ -49,17 +49,18 @@ func ReadAll(path string) ([]byte, error) {
 }
 
 func WriteAll(body []byte, path string) error {
-	f, err := os.OpenFile(path, os.O_CREATE, 0666)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	_, err = f.Write(body)
-	if err != nil {
-		return err
-	}
+	return ioutil.WriteFile(path, body, 0666)
+	//f, err := os.OpenFile(path, os.O_CREATE, 0666)
+	//if err != nil {
+	//	return err
+	//}
+	//defer f.Close()
+	//_, err = f.Write(body)
+	//if err != nil {
+	//	return err
+	//}
 
-	return nil
+	//return nil
 
 }
 
