@@ -1,6 +1,7 @@
 package orm
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/zhyueh/figo/toolkit"
@@ -11,10 +12,22 @@ type Orm struct {
 	db     dlInterface
 	dbType string
 	qb     *MySQLQB
+
+	host     string
+	user     string
+	password string
+	name     string
+	port     int
 }
 
 func NewOrm(dbType, host, user, password, name string, port int) (*Orm, error) {
 	re := new(Orm)
+	re.dbType = dbType
+	re.host = host
+	re.user = user
+	re.password = password
+	re.name = name
+	re.port = port
 
 	re.qb = NewMySQLQB()
 
@@ -35,6 +48,55 @@ func (this *Orm) Fork() *Orm {
 
 	return re
 
+}
+
+/*
+ * need close connection when using clone
+ */
+func (this *Orm) Clone() (*Orm, error) {
+	newOrm, err := NewOrm(
+		this.dbType,
+		this.host,
+		this.user,
+		this.password,
+		this.name,
+		this.port,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return newOrm, nil
+}
+
+func (this *Orm) Transaction() (*Orm, error) {
+	//new db connection for transaction
+	newOrm, err := this.Clone()
+	if err != nil {
+		return nil, err
+	}
+
+	transactionError := newOrm.db.TBegin()
+	if transactionError != nil {
+		return nil, transactionError
+	}
+
+	return newOrm, nil
+}
+
+func (this *Orm) TCommit() error {
+	return this.db.TCommit()
+}
+
+func (this *Orm) TRollback() error {
+	return this.db.TRollback()
+}
+
+func (this *Orm) TExec(sql string, args ...interface{}) (sql.Result, error) {
+	return this.db.TExec(sql, args...)
+}
+
+func (this *Orm) TQuery(sql string, args ...interface{}) ([]DbRow, error) {
+	return this.db.TQuery(sql, args...)
 }
 
 func (this *Orm) Close() {
@@ -67,6 +129,7 @@ func (this *Orm) Page(index, num int) *Orm {
 }
 
 func (this *Orm) Find(o ModelInterface) (error, bool) {
+	defer this.qb.Reset()
 	field, val, exists := GetIdFieldValue(o)
 	if exists {
 		this.qb.Where(fmt.Sprintf("`%s`=?", field), val)
@@ -85,6 +148,7 @@ func (this *Orm) Find(o ModelInterface) (error, bool) {
 }
 
 func (this *Orm) One(o ModelInterface) (error, bool) {
+	defer this.qb.Reset()
 	this.qb.Table(ModelTableName(o))
 	sql, args := this.qb.Select()
 	//fmt.Println(sql)
@@ -97,6 +161,7 @@ func (this *Orm) One(o ModelInterface) (error, bool) {
 }
 
 func (this *Orm) All(o ModelInterface) (error, []interface{}) {
+	defer this.qb.Reset()
 	//if len(os) == 0 {
 	//	return errors.New("no data list when calling All"), 0
 	//}
@@ -125,6 +190,7 @@ func (this *Orm) All(o ModelInterface) (error, []interface{}) {
 }
 
 func (this *Orm) Count(o ModelInterface) (int, error) {
+	defer this.qb.Reset()
 	this.qb.Table(ModelTableName(o))
 	sql, args := this.qb.Count()
 	dbrows, err := this.db.All(sql, args...)
@@ -141,6 +207,7 @@ func (this *Orm) Count(o ModelInterface) (int, error) {
 }
 
 func (this *Orm) Save(o ModelInterface) error {
+	defer this.qb.Reset()
 	fields, values := GetSaveModelFieldValues(o)
 	this.qb.Fields(fields)
 	this.qb.Values(values)

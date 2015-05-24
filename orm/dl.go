@@ -1,6 +1,7 @@
 package orm
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 )
@@ -15,6 +16,12 @@ type dlInterface interface {
 	Delete(string, ...interface{}) (int64, error)
 	One(string, ...interface{}) (DbRow, error)
 	All(string, ...interface{}) ([]DbRow, error)
+
+	TBegin() error
+	TCommit() error
+	TRollback() error
+	TExec(string, ...interface{}) (sql.Result, error)
+	TQuery(string, ...interface{}) ([]DbRow, error)
 }
 
 func NewDL(dbType, host, user, password, db string, port int) (dlInterface, error) {

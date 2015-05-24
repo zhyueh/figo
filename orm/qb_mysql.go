@@ -24,16 +24,19 @@ type MySQLQB struct {
 
 func NewMySQLQB() *MySQLQB {
 	re := new(MySQLQB)
-	re.fields = make([]string, 0)
-	re.values = make([]interface{}, 0)
-	re.tables = make([]string, 0)
-	re.conditions = ""
-	re.orders = make([]string, 0)
-	re.limit = ""
-
+	re.Reset()
 	return re
 }
 
+func (this *MySQLQB) Reset() {
+	this.fields = make([]string, 0)
+	this.values = make([]interface{}, 0)
+	this.tables = make([]string, 0)
+	this.conditions = ""
+	this.orders = make([]string, 0)
+	this.limit = ""
+
+}
 func (this *MySQLQB) KeyFields(fields []string) {
 	this.keyFields = fields
 }

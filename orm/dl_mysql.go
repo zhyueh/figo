@@ -7,6 +7,7 @@ import (
 
 type DLMysql struct {
 	db *sql.DB
+	tx *sql.Tx
 }
 
 func NewMysqlLayer(driver, connString string) (*DLMysql, error) {
@@ -65,6 +66,43 @@ func (this *DLMysql) Close() {
 //	}
 //	return nil
 //}
+
+func (this *DLMysql) TBegin() error {
+	if tx, err := this.db.Begin(); err != nil {
+		return err
+	} else {
+		this.tx = tx
+	}
+	return nil
+}
+
+func (this *DLMysql) TCommit() error {
+	return this.tx.Commit()
+}
+
+func (this *DLMysql) TRollback() error {
+	return this.tx.Rollback()
+}
+
+func (this *DLMysql) TExec(sql string, args ...interface{}) (sql.Result, error) {
+	return this.tx.Exec(sql, args...)
+}
+
+func (this *DLMysql) TQuery(sql string, args ...interface{}) ([]DbRow, error) {
+	rows, err := this.tx.Query(sql, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	r := make([]DbRow, 0)
+
+	for rows.Next() {
+		r = append(r, myScan(rows))
+	}
+
+	return r, nil
+}
 
 func (this *DLMysql) Exec(sql string, args ...interface{}) error {
 	_, err := this.db.Exec(sql, args...)
