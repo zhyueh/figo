@@ -22,6 +22,13 @@ func PathJoin(args ...string) string {
 	return buf.String()
 }
 
+func ParentPath(path string) string {
+	if index := strings.LastIndex(path, "/"); index != -1 {
+		return path[0 : index+1]
+	}
+	return ""
+}
+
 func IsExists(path string) bool {
 	_, err := os.Stat(path)
 	if err == nil {
@@ -64,14 +71,14 @@ func WriteAll(body []byte, path string) error {
 
 }
 
-func RemoveFileIfExists(path string) bool {
+func RemoveFileIfExists(path string) error {
 	if IsExists(path) {
 		err := os.Remove(path)
 		if err != nil {
-			return false
+			return err
 		}
 	}
-	return true
+	return nil
 }
 
 type WalkFileFunc func(fileInfo os.FileInfo)
