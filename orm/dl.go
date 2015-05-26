@@ -26,7 +26,7 @@ type dlInterface interface {
 
 func NewDL(dbType, host, user, password, db string, port int) (dlInterface, error) {
 	if dbType == "mysql" {
-		connectString := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8", user, password, host, port, db)
+		connectString := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&loc=Local", user, password, host, port, db)
 		return NewMysqlLayer(dbType, connectString)
 	}
 	return nil, errors.New("un support db layer type")
