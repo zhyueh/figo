@@ -210,14 +210,20 @@ func (this *DataLogger) autoFlush() {
 		for {
 			select {
 			case <-timer.C:
-				func() {
-					lineCount := len(this.lines)
-					if (lineCount >= this.cacheLineCount) || (lineCount > 0 && this.writingName != this.getFileName()) {
-						if err := this.Flush(); err != nil {
-							panic(err)
+				if err := this.Flush(); err != nil {
+					panic(err)
+				}
+
+				/*
+					func() {
+						lineCount := len(this.lines)
+						if (lineCount >= this.cacheLineCount) || (lineCount > 0 && this.writingName != this.getFileName()) {
+							if err := this.Flush(); err != nil {
+								panic(err)
+							}
 						}
-					}
-				}()
+					}()
+				*/
 			case <-this.quit:
 				break
 			}
