@@ -63,7 +63,7 @@ func (this *MySQLQB) Where(cond string, i ...interface{}) {
 		this.values = append(this.values, i...)
 	} else {
 		this.conditions = fmt.Sprintf("%s and %s", this.conditions, cond)
-		this.values = append(this.values, i)
+		this.values = append(this.values, i...)
 	}
 }
 
