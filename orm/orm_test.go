@@ -179,6 +179,36 @@ func TestPage(t *testing.T) {
 
 }
 
+func TestWhereIn(t *testing.T) {
+	orm := getOrm()
+	u := new(user)
+	//count, _ := orm.Count(u)
+	count := 1000
+
+	uids := make([]interface{}, count)
+	for i, _ := range uids {
+		uids[i] = count - i
+	}
+
+	us_err, us := orm.WhereIn("`id`", uids...).All(u)
+	if us_err != nil {
+		t.Fatal(us_err)
+	}
+	t.Log(us)
+}
+
+/*
+func TestProcedure(t *testing.T) {
+	orm := getOrm()
+	rows, err := orm.Query("call get_user_by_id(?)", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Fatal(rows)
+
+}
+*/
+
 func getOrm() *Orm {
 	orm, _ := NewOrm("mysql", "127.0.0.1", "root", "root", "test", 3306)
 	return orm

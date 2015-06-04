@@ -58,13 +58,30 @@ func (this *MySQLQB) Table(table string) {
 }
 
 func (this *MySQLQB) Where(cond string, i ...interface{}) {
-	this.conditions = cond
-	this.values = append(this.values, i...)
+	if len(this.conditions) == 0 {
+		this.conditions = cond
+		this.values = append(this.values, i...)
+	} else {
+		this.conditions = fmt.Sprintf("%s and %s", this.conditions, cond)
+		this.values = append(this.values, i)
+	}
 }
 
+func (this *MySQLQB) WhereIn(cond string, i ...interface{}) {
+	vals := make([]string, len(i))
+	for i, _ := range vals {
+		vals[i] = "?"
+	}
+	newCond := fmt.Sprintf("%s in (%s)", cond, strings.Join(vals, MYSQL_COMMA_SPACE))
+
+	this.Where(newCond, i...)
+}
+
+/*
+*
+ */
 func (this *MySQLQB) And(cond string, i interface{}) {
-	this.conditions = fmt.Sprintf("%s and %s", this.conditions, cond)
-	this.values = append(this.values, i)
+	this.Where(cond, i)
 }
 
 func (this *MySQLQB) Or(cond string, i interface{}) {

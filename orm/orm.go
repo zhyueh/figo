@@ -108,6 +108,11 @@ func (this *Orm) Where(cond string, i ...interface{}) *Orm {
 	return this
 }
 
+func (this *Orm) WhereIn(cond string, i ...interface{}) *Orm {
+	this.qb.WhereIn(cond, i...)
+	return this
+}
+
 func (this *Orm) And(cond string, i interface{}) *Orm {
 	this.qb.And(cond, i)
 	return this
