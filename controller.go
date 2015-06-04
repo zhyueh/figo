@@ -9,6 +9,7 @@ import (
 
 type ControllerInterface interface {
 	Init(w http.ResponseWriter, r *http.Request)
+	Preload() error
 	Get()
 	Post()
 	Flush()
@@ -34,6 +35,10 @@ func NewController() *Controller {
 	re.ControllerName = ""
 
 	return re
+}
+
+func (this *Controller) Preload() error {
+	return nil
 }
 
 func (this *Controller) SetCache(cache *cache.Cache) {

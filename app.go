@@ -140,13 +140,15 @@ func (this *App) safeRun(w http.ResponseWriter, r *http.Request) (httpStatus int
 		controller.SetLogger(this.getControllerLogger(controller.GetControllerName()))
 		controller.SetCache(this.cache)
 		controller.SetOrm(this.orm)
-
-		method := r.Method
-		switch method {
-		case "POST":
-			controller.Post()
-		default:
-			controller.Get()
+		preloadErr := controller.Preload()
+		if preloadErr == nil {
+			method := r.Method
+			switch method {
+			case "POST":
+				controller.Post()
+			default:
+				controller.Get()
+			}
 		}
 
 		controller.Flush()
