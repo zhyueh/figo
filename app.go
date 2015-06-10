@@ -6,6 +6,7 @@ import (
 	"github.com/zhyueh/figo/log"
 	"github.com/zhyueh/figo/orm"
 	"github.com/zhyueh/figo/toolkit"
+	"golang.org/x/net/websocket"
 	"net"
 	"net/http"
 	"os"
@@ -142,12 +143,23 @@ func (this *App) safeRun(w http.ResponseWriter, r *http.Request) (httpStatus int
 		controller.SetOrm(this.orm)
 		preloadErr := controller.Preload()
 		if preloadErr == nil {
-			method := r.Method
-			switch method {
-			case "POST":
-				controller.Post()
-			default:
-				controller.Get()
+			switch controller.GetConnectMode() {
+			case HttpMode:
+				method := r.Method
+				switch method {
+				case "POST":
+					controller.Post()
+				default:
+					controller.Get()
+				}
+				//campatible websocket
+			case WebsocketMode:
+				webHandler := func(conn *websocket.Conn) {
+					controller.SetWebsocketConnection(conn)
+					controller.Get()
+				}
+				s := websocket.Server{Handler: webHandler}
+				s.ServeHTTP(w, r)
 			}
 		}
 
