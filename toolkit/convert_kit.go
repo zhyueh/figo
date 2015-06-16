@@ -143,6 +143,8 @@ func ConvertToString(o interface{}) string {
 		return strconv.Itoa(o.(int))
 	case int64:
 		return fmt.Sprintf("%d", o.(int64))
+	case float64:
+		return strconv.FormatFloat(o.(float64), 'f', 6, 64)
 	}
 	return ""
 }
