@@ -44,6 +44,11 @@ func (this *Cache) Exists(key string) (bool, error) {
 	return this.redisClient.Exists(key)
 }
 
+func (this *Cache) Del(key string) error {
+	_, err := this.redisClient.Del(key)
+	return err
+}
+
 func (this *Cache) GetValue(key string) (string, error) {
 	data, err := this.redisClient.Get(key)
 	if err != nil {
