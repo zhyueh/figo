@@ -63,7 +63,7 @@ func (this *Cache) SetValue(key, value string) error {
 }
 
 func (this *Cache) SetValueEx(key, value string, seconds int) error {
-	return this.redisClient.Set(key, value, seconds, 0, false, false)
+	return this.redisClient.Setex(key, seconds, value)
 }
 
 func (this *Cache) SetTTL(key string, seconds int) error {
