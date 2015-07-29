@@ -167,6 +167,28 @@ func ModelUpdateId(model interface{}, id int64) {
 
 }
 
+func DbRowToModelEx(row DbRow, model interface{}) {
+	//fmt.Println(row)
+	val := reflect.ValueOf(model).Elem()
+	modelType := val.Type()
+
+	for i := 0; i < val.NumField(); i++ {
+		f := modelType.Field(i)
+		if f.Tag.Get("orm") == "extend" && f.Type.Kind() == reflect.Struct {
+			DbRowToModelEx(row, val.Field(i).Addr().Interface())
+		} else if name, canSet := getCanSetFieldName(f); canSet {
+			o, exists := row[name]
+			if exists {
+				val.Field(i).Set(convertSqlValueToFieldValue(o, f))
+			} else {
+				//fmt.Println("do not exists ", name)
+			}
+		} else {
+			//fmt.Println("can not set")
+		}
+	}
+}
+
 func DbRowToModel(row DbRow, model interface{}) {
 	//fmt.Println(row)
 	val := reflect.ValueOf(model).Elem()

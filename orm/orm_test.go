@@ -22,6 +22,34 @@ type UserDetail struct {
 	Address string `orm:"varchar(25)"`
 }
 
+type UserDetailEx struct {
+	UserDetail `orm:"extend"`
+	Abc        int `orm:"int"`
+}
+
+type UserDetailExEx struct {
+	UserDetailEx `orm:"extend"`
+}
+
+func TestDbRowToModelEx(t *testing.T) {
+	orm := getOrm()
+	sql := "select * , 12 as abc from user_detail limit 1"
+	if dbrows, err := orm.Query(sql); err == nil {
+		for _, row := range dbrows {
+			t.Log(row)
+			ex := new(UserDetailExEx)
+			DbRowToModelEx(row, ex)
+			if ex.UserId == 0 {
+				t.Fatal("dbrow to model ex not work")
+			}
+			t.Log(ex)
+		}
+	} else {
+		t.Fatal(err)
+	}
+
+}
+
 func FatalError(t *testing.T, err error) {
 	if err != nil {
 		t.Fatal(err)
@@ -210,6 +238,6 @@ func TestProcedure(t *testing.T) {
 */
 
 func getOrm() *Orm {
-	orm, _ := NewOrm("mysql", "127.0.0.1", "root", "root", "test", 3306)
+	orm, _ := NewOrm("mysql", "127.0.0.1", "root", "123456", "test", 3306)
 	return orm
 }
