@@ -133,6 +133,15 @@ func (this *Orm) Page(index, num int) *Orm {
 	return this
 }
 
+func (this *Orm) QueryRaw(o interface{}, sql string, args ...interface{}) (error, bool) {
+	dbrow, err := this.db.One(sql, args...)
+	if err != nil {
+		return err, false
+	}
+	DbRowToModel(dbrow, o)
+	return nil, len(dbrow) != 0
+}
+
 func (this *Orm) Find(o ModelInterface) (error, bool) {
 	defer this.qb.Reset()
 	field, val, exists := GetIdFieldValue(o)
@@ -244,6 +253,10 @@ func (this *Orm) Save(o ModelInterface) error {
 	}
 
 	return nil
+}
+
+func (this *Orm) QueryOne(sql string, args ...interface{}) (DbRow, error) {
+	return this.db.One(sql, args...)
 }
 
 func (this *Orm) Query(sql string, args ...interface{}) ([]DbRow, error) {
