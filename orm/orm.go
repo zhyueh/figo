@@ -264,5 +264,10 @@ func (this *Orm) Query(sql string, args ...interface{}) ([]DbRow, error) {
 }
 
 func (this *Orm) Execute(sql string, args ...interface{}) error {
+	_, err := this.db.Exec(sql, args...)
+	return err
+}
+
+func (this *Orm) Exec(sql string, args ...interface{}) (sql.Result, error) {
 	return this.db.Exec(sql, args...)
 }

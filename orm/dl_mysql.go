@@ -104,9 +104,8 @@ func (this *DLMysql) TQuery(sql string, args ...interface{}) ([]DbRow, error) {
 	return r, nil
 }
 
-func (this *DLMysql) Exec(sql string, args ...interface{}) error {
-	_, err := this.db.Exec(sql, args...)
-	return err
+func (this *DLMysql) Exec(sql string, args ...interface{}) (sql.Result, error) {
+	return this.db.Exec(sql, args...)
 }
 
 func (this *DLMysql) Insert(sql string, args ...interface{}) (int64, error) {

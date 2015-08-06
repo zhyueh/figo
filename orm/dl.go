@@ -10,7 +10,7 @@ type DbRow map[string]interface{}
 
 type dlInterface interface {
 	Close()
-	Exec(string, ...interface{}) error
+	Exec(string, ...interface{}) (sql.Result, error)
 	Insert(string, ...interface{}) (int64, error)
 	Update(string, ...interface{}) (int64, error)
 	Delete(string, ...interface{}) (int64, error)
