@@ -122,70 +122,82 @@ func ConvertToTime(o interface{}) time.Time {
 }
 
 func ConvertToFloat64(o interface{}) float64 {
-	switch o.(type) {
-	case float64:
-		return o.(float64)
-	case string:
-		if f, err := strconv.ParseFloat(o.(string), 64); err == nil {
+	val := reflect.ValueOf(o)
+	kind := reflect.TypeOf(o).Kind()
+	switch {
+	case kind == reflect.Float32 || kind == reflect.Float64:
+		return val.Float()
+	case kind == reflect.String:
+		if f, err := strconv.ParseFloat(val.String(), 64); err == nil {
 			return f
 		}
-	case int:
-		return float64(o.(int))
+	case kind >= reflect.Int && kind <= reflect.Int64:
+		return float64(val.Int())
+	case kind >= reflect.Uint && kind <= reflect.Uint64:
+		return float64(val.Uint())
 	}
 	return 0.0
 }
 
 func ConvertToString(o interface{}) string {
-	switch o.(type) {
-	case string:
-		return o.(string)
-	case int:
-		return strconv.Itoa(o.(int))
-	case int64:
-		return fmt.Sprintf("%d", o.(int64))
-	case float64:
-		return strconv.FormatFloat(o.(float64), 'f', 6, 64)
+	val := reflect.ValueOf(o)
+	kind := reflect.TypeOf(o).Kind()
+	switch {
+	case kind == reflect.String:
+		return val.String()
+	case kind == reflect.Float32 || kind == reflect.Float64:
+		return strconv.FormatFloat(val.Float(), 'f', -1, 64)
+	case kind >= reflect.Int && kind <= reflect.Int64:
+		return fmt.Sprintf("%d", val.Int())
+	case kind >= reflect.Uint && kind <= reflect.Uint64:
+		return fmt.Sprintf("%d", val.Uint())
 	}
 	return ""
 }
 
 func ConvertToInt(o interface{}) int {
-	switch o.(type) {
-	case int64:
-		return int(o.(int64))
-	case int:
-		return o.(int)
-	case float64:
-		return int(o.(float64))
-	case string:
-		i, err := strconv.Atoi(o.(string))
+	val := reflect.ValueOf(o)
+	kind := reflect.TypeOf(o).Kind()
+	switch {
+	case kind == reflect.String:
+		i, err := strconv.Atoi(val.String())
 		if err == nil {
 			return i
 		}
-
-		f, ferr := strconv.ParseFloat(o.(string), 64)
+		f, ferr := strconv.ParseFloat(val.String(), 64)
 		if ferr == nil {
 			return int(f)
 		}
+	case kind == reflect.Float32 || kind == reflect.Float64:
+		return int(val.Float())
+	case kind >= reflect.Int && kind <= reflect.Int64:
+		return int(val.Int())
+	case kind >= reflect.Uint && kind <= reflect.Uint64:
+		return int(val.Uint())
 	}
 	return 0
 }
 
 func ConvertToInt64(o interface{}) int64 {
-	switch o.(type) {
-	case int64:
-		return o.(int64)
-	case int:
-		return int64(o.(int))
-	case float64:
-		return int64(o.(float64))
-	case string:
-		re, err := strconv.ParseInt(o.(string), 10, 0)
-		if err != nil {
-			return 0
-		} else {
+	val := reflect.ValueOf(o)
+	kind := reflect.TypeOf(o).Kind()
+	switch {
+	case kind == reflect.String:
+		re, err := strconv.ParseInt(val.String(), 10, 0)
+		if err == nil {
 			return re
 		}
+
+		f, ferr := strconv.ParseFloat(val.String(), 64)
+		if ferr == nil {
+			return int64(f)
+		}
+	case kind == reflect.Float32 || kind == reflect.Float64:
+		return int64(val.Float())
+	case kind >= reflect.Int && kind <= reflect.Int64:
+		return val.Int()
+	case kind >= reflect.Uint && kind <= reflect.Uint64:
+		return int64(val.Uint())
 	}
 	return 0
 }
