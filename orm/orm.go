@@ -70,11 +70,12 @@ func (this *Orm) Clone() (*Orm, error) {
 
 func (this *Orm) Transaction() (*Orm, error) {
 	//new db connection for transaction
-	newOrm, err := this.Clone()
-	if err != nil {
-		return nil, err
-	}
+	//newOrm, err := this.Clone()
+	//if err != nil {
+	//	return nil, err
+	//}
 
+	newOrm := this.Fork()
 	transactionError := newOrm.db.TBegin()
 	if transactionError != nil {
 		return nil, transactionError

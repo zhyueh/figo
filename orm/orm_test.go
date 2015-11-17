@@ -1,6 +1,7 @@
 package orm
 
 import (
+	"fmt"
 	"github.com/zhyueh/figo/toolkit"
 	"testing"
 	"time"
@@ -236,6 +237,47 @@ func TestProcedure(t *testing.T) {
 
 }
 */
+
+func TestTransactionInGoroutine(t *testing.T) {
+	orm := getOrm()
+
+	ch := make(chan int)
+
+	tx, _ := orm.Transaction()
+	re, _ := tx.TExec("update user_detail set address = ? limit 1", toolkit.RandomString(5))
+	fmt.Println("main execed")
+
+	go func(db *Orm, ch chan int, t *testing.T) {
+		time.Sleep(2 * time.Second)
+		tx, _ := db.Transaction()
+		re, _ := tx.TExec("update user set timestamp = now()")
+		fmt.Println("goroutine execed")
+		ch <- 1
+		time.Sleep(2 * time.Second)
+		d, _ := re.RowsAffected()
+		fmt.Println("goroutine affected:", d)
+		if d <= 1 {
+			t.Fatal("dirty data in go routine")
+		}
+		tx.TCommit()
+		ch <- 1
+	}(orm, ch, t)
+
+	select {
+	case <-ch:
+		d, _ := re.RowsAffected()
+		fmt.Println("main affected:", d)
+		if d != 1 {
+			t.Fatal("dirty data in main ")
+		}
+		tx.TCommit()
+	}
+
+	select {
+	case <-ch:
+		t.Log("Complete Transaction in goroutine")
+	}
+}
 
 func getOrm() *Orm {
 	orm, _ := NewOrm("mysql", "127.0.0.1", "root", "123456", "test", 3306)

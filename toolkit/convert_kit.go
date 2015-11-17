@@ -123,6 +123,10 @@ func ConvertToTime(o interface{}) time.Time {
 
 func ConvertToFloat64(o interface{}) float64 {
 	val := reflect.ValueOf(o)
+	if !val.IsValid() {
+		return 0.0
+	}
+
 	kind := reflect.TypeOf(o).Kind()
 	switch {
 	case kind == reflect.Float32 || kind == reflect.Float64:
@@ -141,6 +145,9 @@ func ConvertToFloat64(o interface{}) float64 {
 
 func ConvertToString(o interface{}) string {
 	val := reflect.ValueOf(o)
+	if !val.IsValid() {
+		return ""
+	}
 	kind := reflect.TypeOf(o).Kind()
 	switch {
 	case kind == reflect.String:
@@ -157,6 +164,9 @@ func ConvertToString(o interface{}) string {
 
 func ConvertToInt(o interface{}) int {
 	val := reflect.ValueOf(o)
+	if !val.IsValid() {
+		return 0
+	}
 	kind := reflect.TypeOf(o).Kind()
 	switch {
 	case kind == reflect.String:
@@ -180,6 +190,10 @@ func ConvertToInt(o interface{}) int {
 
 func ConvertToInt64(o interface{}) int64 {
 	val := reflect.ValueOf(o)
+	if !val.IsValid() {
+		return 0
+	}
+
 	kind := reflect.TypeOf(o).Kind()
 	switch {
 	case kind == reflect.String:
