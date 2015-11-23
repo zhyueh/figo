@@ -238,6 +238,69 @@ func TestProcedure(t *testing.T) {
 }
 */
 
+func TestSaveTransaction(t *testing.T) {
+	orm := getOrm()
+
+	u := new(user)
+
+	//new
+	randomString := toolkit.RandomString(5)
+	u.Name = randomString
+	tx, _ := orm.Transaction()
+	err := tx.TSave(u)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if u.Id < 1 {
+		tx.TRollback()
+		t.Fatal("new id ", u.Id)
+	} else {
+		tx.TCommit()
+	}
+
+	//check
+	if !checkUserIdAndName(u.Id, randomString) {
+		t.Fatal("tsave error")
+	} else {
+		t.Log("tsave ok")
+	}
+	fmt.Println("after tnew ", u)
+
+	//update
+	randomString = "uuuuu"
+	tx, _ = orm.Transaction()
+	u.Name = randomString
+	err = tx.TSave(u)
+
+	fmt.Println("after tupdate ", u)
+	if err != nil {
+		t.Fatal("transaction error ", err)
+	} else {
+		tx.TCommit()
+	}
+	if !checkUserIdAndName(u.Id, randomString) {
+		tx.TRollback()
+		t.Fatal("tupdate error")
+	} else {
+		t.Log("tupdate ok")
+	}
+}
+
+func checkUserIdAndName(id int, name string) bool {
+	orm := getOrm()
+
+	u := new(user)
+	u.Id = id
+	err, exists := orm.Find(u)
+
+	if err != nil || exists != true {
+		fmt.Println("no id ", id)
+		return false
+	}
+
+	return u.Name == name
+}
+
 func TestTransactionInGoroutine(t *testing.T) {
 	orm := getOrm()
 

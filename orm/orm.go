@@ -100,6 +100,41 @@ func (this *Orm) TQuery(sql string, args ...interface{}) ([]DbRow, error) {
 	return this.db.TQuery(sql, args...)
 }
 
+func (this *Orm) TSave(o ModelInterface) error {
+	defer this.qb.Reset()
+	fields, values := GetSaveModelFieldValues(o)
+	this.qb.Fields(fields)
+	this.qb.Values(values)
+	//fmt.Println("model table name", ModelTableName(o))
+	this.qb.Table(ModelTableName(o))
+
+	if NeedInsertModel(o) {
+		sql, args := this.qb.Insert()
+		//fmt.Println(sql)
+		id, err := this.db.TInsert(sql, args...)
+		if err != nil {
+			return err
+		}
+		ModelUpdateId(o, id)
+	} else {
+		kFields, kValues, _ := GetKeyFieldValues(o)
+		//fmt.Println(kFields, kValues)
+		if len(kFields) == 0 {
+			return errors.New("no id define")
+		}
+		this.qb.KeyFields(kFields)
+		this.qb.KeyValues(kValues)
+		sql, args := this.qb.InsertIgnore()
+		//fmt.Println(sql, args)
+		_, err := this.db.TUpdate(sql, args...)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (this *Orm) Close() {
 	this.db.Close()
 }

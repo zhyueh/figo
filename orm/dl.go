@@ -22,6 +22,8 @@ type dlInterface interface {
 	TRollback() error
 	TExec(string, ...interface{}) (sql.Result, error)
 	TQuery(string, ...interface{}) ([]DbRow, error)
+	TInsert(string, ...interface{}) (int64, error)
+	TUpdate(string, ...interface{}) (int64, error)
 }
 
 func NewDL(dbType, host, user, password, db string, port int) (dlInterface, error) {

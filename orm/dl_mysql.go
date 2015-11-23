@@ -104,6 +104,26 @@ func (this *DLMysql) TQuery(sql string, args ...interface{}) ([]DbRow, error) {
 	return r, nil
 }
 
+func (this *DLMysql) TInsert(sql string, args ...interface{}) (int64, error) {
+	res, err := this.tx.Exec(sql, args...)
+	if err != nil {
+		return 0, err
+	}
+
+	r, _ := res.LastInsertId()
+	return r, nil
+}
+
+func (this *DLMysql) TUpdate(sql string, args ...interface{}) (int64, error) {
+	res, err := this.tx.Exec(sql, args...)
+	if err != nil {
+		return 0, err
+	}
+
+	r, _ := res.RowsAffected()
+	return r, nil
+}
+
 func (this *DLMysql) Exec(sql string, args ...interface{}) (sql.Result, error) {
 	return this.db.Exec(sql, args...)
 }
