@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-// all data handelr should implement do func
+// all data handler should implement do func
 type ObServerDataInterface interface {
 	Do()
 }
