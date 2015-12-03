@@ -5,6 +5,7 @@ import (
 	"reflect"
 )
 
+// all data handelr should implement do func
 type ObServerDataInterface interface {
 	Do()
 }
@@ -28,18 +29,17 @@ func (this *ObServerCenter) Init() {
 
 // checkout the server data type which i is implemented from
 func (this *ObServerCenter) getServerDataTypeFromServerDataInterface(i ObServerDataInterface) reflect.Type {
-	itype := reflect.ValueOf(i).Elem().Type()
-	if itype.NumField() > 0 {
-		firstFieldType := itype.Field(0).Type
+	iType := reflect.ValueOf(i).Elem().Type()
+	if iType.NumField() > 0 {
+		firstFieldType := iType.Field(0).Type
 		if firstFieldType.Kind() == reflect.Struct {
 			return firstFieldType
 		}
 	}
 
-	return itype
+	return iType
 }
 
-//
 func (this *ObServerCenter) RegisterHandler(i ObServerDataInterface) {
 	handlerType := reflect.ValueOf(i).Elem().Type()
 	dataType := this.getServerDataTypeFromServerDataInterface(i)
@@ -86,15 +86,28 @@ func (this *ObServerCenter) HandleData(i ObServerDataInterface) {
 		handler := handlerPtr.Elem()
 
 		//copy value from i into handler
-		handler.Field(0).Set(iv)
+		if handler.NumField() > 0 {
 
-		//execute do of handler
-		doFunc := handlerPtr.MethodByName("Do")
-		if doFunc.IsValid() {
-			doFunc.Call(nil)
-		} else {
-			fmt.Println(handlerPtr, "has no do func")
+			// even it has check the type when register handler
+			// but we have to ensure the data's type is the same as handler's
+			handlerBaseType := handler.Field(0).Type()
+			dataType := iv.Type()
+			if handlerBaseType.PkgPath() != dataType.PkgPath() ||
+				handlerBaseType.String() != dataType.String() {
+				continue
+			}
+
+			handler.Field(0).Set(iv)
+
+			//execute do of handler
+			doFunc := handlerPtr.MethodByName("Do")
+			if doFunc.IsValid() {
+				doFunc.Call(nil)
+			} else {
+				fmt.Println(handlerPtr, "has no do func")
+			}
 		}
+
 	}
 }
 
