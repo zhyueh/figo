@@ -7,6 +7,7 @@ import (
 
 // all data handler should implement do func
 type ObServerDataInterface interface {
+	Init()
 	Do()
 }
 
@@ -15,6 +16,10 @@ type ObServerData struct {
 }
 
 func (this *ObServerData) Do() {
+	//leaving blank
+}
+
+func (this *ObServerData) Init() {
 	//leaving blank
 }
 
@@ -98,6 +103,14 @@ func (this *ObServerCenter) HandleData(i ObServerDataInterface) {
 			}
 
 			handler.Field(0).Set(iv)
+
+			//execute do of handler
+			initFunc := handlerPtr.MethodByName("Init")
+			if initFunc.IsValid() {
+				initFunc.Call(nil)
+			} else {
+				fmt.Println(handlerPtr, "has no init func")
+			}
 
 			//execute do of handler
 			doFunc := handlerPtr.MethodByName("Do")

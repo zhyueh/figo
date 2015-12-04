@@ -3,12 +3,24 @@ package observer
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
+type ObServerORMData struct {
+	Orm int
+}
+
+func (this *ObServerORMData) Init() {
+	//init orm
+	this.Orm = 1
+	fmt.Println("in ormdata do")
+}
+
 type OrderCancelData struct {
-	ObServerData
-	OrderId int
-	UserId  int
+	ObServerORMData
+	OrderId    int
+	UserId     int
+	CancelTime *time.Time
 }
 
 type OrderCancelLogHandler struct {
@@ -16,7 +28,15 @@ type OrderCancelLogHandler struct {
 }
 
 func (this *OrderCancelLogHandler) Do() {
-	fmt.Println(this.UserId, " cancel an order")
+	fmt.Println(this.UserId, " cancel an order, orm:", this.Orm)
+}
+
+type OrderCancelMessageHandler struct {
+	OrderCancelData
+}
+
+func (this *OrderCancelMessageHandler) Do() {
+	fmt.Println("message handler time", this.CancelTime)
 }
 
 // observer data
@@ -65,34 +85,30 @@ func TestHandleData(t *testing.T) {
 
 	ob.RegisterHandler(new(OrderCompleteMessageHandler))
 	ob.RegisterHandler(new(OrderCompleteLogHandler))
-	ob.RegisterHandler(new(OrderCancelLogHandler))
 
 	data := new(OrderCompleteData)
-	data.OrderId = 456
+	data.OrderId = 4567
 
 	ob.HandleData(data)
-
-	cdata := new(OrderCancelData)
-	cdata.OrderId = 777
-	cdata.UserId = 888
-
-	ob.HandleData(cdata)
-
 }
 
 func TestGlobalCenter(t *testing.T) {
+
 	RegisterHandler(new(OrderCompleteMessageHandler))
 	RegisterHandler(new(OrderCompleteLogHandler))
 	RegisterHandler(new(OrderCancelLogHandler))
+	RegisterHandler(new(OrderCancelMessageHandler))
 
 	data := new(OrderCompleteData)
 	data.OrderId = 999
-
 	HandleData(data)
 
 	cdata := new(OrderCancelData)
 	cdata.OrderId = 111
 	cdata.UserId = 222
-
+	now := time.Now()
+	cdata.CancelTime = &now
 	HandleData(cdata)
+
+	globalObServerCenter.PrintHandlers()
 }
