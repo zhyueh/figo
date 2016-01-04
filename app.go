@@ -3,6 +3,7 @@ package figo
 import (
 	"fmt"
 	"github.com/zhyueh/figo/cache"
+	"github.com/zhyueh/figo/context"
 	"github.com/zhyueh/figo/log"
 	"github.com/zhyueh/figo/orm"
 	"github.com/zhyueh/figo/toolkit"
@@ -136,6 +137,7 @@ func (this *App) safeRun(w http.ResponseWriter, r *http.Request) (httpStatus int
 
 	controller := this.routerFunc(r.URL.Path)
 
+	defer context.Clear(r)
 	if controller != nil {
 		controller.Init(w, r)
 		controller.SetLogger(this.getControllerLogger(controller.GetControllerName()))
