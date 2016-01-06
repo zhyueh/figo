@@ -21,7 +21,10 @@ type App struct {
 	name   string
 	config *AppConfig
 
-	routerFunc func(string) ControllerInterface
+	//replace by router
+	//routerFunc  func(string) ControllerInterface
+	Router      *Router
+	controllers map[string]ControllerInterface
 
 	accessLogger      *log.DataLogger
 	appLogger         *log.DataLogger
@@ -33,6 +36,8 @@ type App struct {
 func NewApp(name string) *App {
 	re := &App{}
 	re.name = name
+	re.Router = NewRouter()
+	re.controllers = make(map[string]ControllerInterface, 0)
 	re.config = nil
 	re.accessLogger = nil
 	re.appLogger = nil
@@ -83,7 +88,9 @@ func (this *App) Run(config *AppConfig, routerFunc func(string) ControllerInterf
 
 	listen, _ := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", config.Port))
 
-	this.routerFunc = routerFunc
+	if routerFunc != nil {
+		this.Router.SetRouterFunc(routerFunc)
+	}
 	err := http.Serve(listen, this)
 
 	if err != nil {
@@ -135,7 +142,7 @@ func (this *App) safeRun(w http.ResponseWriter, r *http.Request) (httpStatus int
 		}
 	}()
 
-	controller := this.routerFunc(r.URL.Path)
+	controller := this.Router.GetController(r.URL.Path)
 
 	defer context.Clear(r)
 	if controller != nil {
@@ -147,13 +154,8 @@ func (this *App) safeRun(w http.ResponseWriter, r *http.Request) (httpStatus int
 		if preloadErr == nil {
 			switch controller.GetConnectMode() {
 			case HttpMode:
-				method := r.Method
-				switch method {
-				case "POST":
-					controller.Post()
-				default:
-					controller.Get()
-				}
+				//controller.Route()
+				ControllerHandleFunc(controller, r.Method, r.URL.Path)
 				//campatible websocket
 			case WebsocketMode:
 				webHandler := func(conn *websocket.Conn) {
@@ -169,10 +171,9 @@ func (this *App) safeRun(w http.ResponseWriter, r *http.Request) (httpStatus int
 		httpStatus = http.StatusOK
 	} else {
 		httpStatus = http.StatusNotFound
+		w.WriteHeader(http.StatusNotFound)
 	}
-
 	return
-
 }
 
 func (this *App) quit() {

@@ -1,11 +1,15 @@
 package figo
 
 import (
+	"fmt"
 	"github.com/zhyueh/figo/cache"
 	"github.com/zhyueh/figo/log"
 	"github.com/zhyueh/figo/orm"
+	"github.com/zhyueh/figo/toolkit"
 	"golang.org/x/net/websocket"
 	"net/http"
+	"reflect"
+	"strings"
 )
 
 const (
@@ -13,7 +17,13 @@ const (
 	WebsocketMode = 1
 )
 
+const (
+	SingleRouterMode = 0
+	AutoRouterMode   = 1
+)
+
 type ControllerInterface interface {
+	//phase II
 	Init(w http.ResponseWriter, r *http.Request)
 	Preload() error
 	GetConnectMode() int8
@@ -26,6 +36,12 @@ type ControllerInterface interface {
 	SetWebsocketConnection(*websocket.Conn)
 
 	GetControllerName() string
+
+	//phase II
+	GetRouteMode() int8
+	//Route()
+	HandleRequestPathNotFound()
+	HandleRequestParseError(error)
 }
 
 type Controller struct {
@@ -84,9 +100,63 @@ func (this *Controller) Flush() {
 }
 
 func (this *Controller) Get() {
-
+	fmt.Println("not implement get")
 }
 
 func (this *Controller) Post() {
 
+}
+
+func (this *Controller) GetRouteMode() int8 {
+	//default single router mode
+	return SingleRouterMode
+}
+
+func ControllerHandleFunc(this ControllerInterface, httpMethod, path string) {
+	if this.GetRouteMode() == SingleRouterMode {
+		switch httpMethod {
+		case "POST":
+			this.Post()
+		default:
+			this.Get()
+		}
+	} else {
+		autoRouteFunc(this, httpMethod, path)
+	}
+}
+
+func autoRouteFunc(this ControllerInterface, httpMethod, path string) {
+	comps := toolkit.SplitString(path, "/")
+	if len(comps) < 2 {
+		this.HandleRequestPathNotFound()
+		return
+	}
+	var methodName string
+	for _, v := range comps[1:] {
+		subComps := strings.Split(v, "-")
+		for _, vv := range subComps {
+			methodName += strings.Title(vv)
+		}
+	}
+	if len(methodName) == 0 {
+		this.HandleRequestPathNotFound()
+		return
+	}
+	methodName = strings.Title(strings.ToLower(httpMethod)) + methodName
+	fmt.Println("has target name", methodName)
+	value := reflect.ValueOf(this)
+	method := value.MethodByName(methodName)
+	if !method.IsValid() {
+		this.HandleRequestPathNotFound()
+		return
+	}
+	method.Call(nil)
+}
+
+func (this *Controller) HandleRequestParseError(err error) {
+	this.Resp.WriteString(fmt.Sprintf("parse err %v", err))
+}
+
+func (this *Controller) HandleRequestPathNotFound() {
+	this.Resp.WriteString(fmt.Sprintf("path not found %s", this.Req.BaseHttpRequest.URL.Path))
 }
