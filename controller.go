@@ -143,7 +143,6 @@ func autoRouteFunc(this ControllerInterface, httpMethod, path string) {
 		return
 	}
 	methodName = strings.Title(strings.ToLower(httpMethod)) + methodName
-	fmt.Println("has target name", methodName)
 	value := reflect.ValueOf(this)
 	method := value.MethodByName(methodName)
 	if !method.IsValid() {

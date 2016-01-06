@@ -154,7 +154,6 @@ func (this *App) safeRun(w http.ResponseWriter, r *http.Request) (httpStatus int
 		if preloadErr == nil {
 			switch controller.GetConnectMode() {
 			case HttpMode:
-				//controller.Route()
 				ControllerHandleFunc(controller, r.Method, r.URL.Path)
 				//campatible websocket
 			case WebsocketMode:
